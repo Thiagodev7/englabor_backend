@@ -1,5 +1,7 @@
 const express = require('express');
 const Joi = require('joi');
+const multer       = require('multer');       // ← adicione isto
+const xlsx         = require('xlsx'); 
 const ApiError = require('../utils/ApiError');
 const { success } = require('../utils/response');
 const authMiddleware = require('../middlewares/auth');
@@ -9,7 +11,8 @@ const {
   getFuncionarioById,
   updateFuncionario,
   deleteFuncionario,
-  listFuncionariosByEmpresa
+  listFuncionariosByEmpresa,
+  importByEmpresa,
 } = require('../services/funcionariosService');
 
 const router = express.Router();
@@ -26,6 +29,8 @@ const schema = Joi.object({
 
 // todas as rotas precisam de token
 router.use(authMiddleware);
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 /**
  * @swagger
@@ -210,5 +215,56 @@ router.get('/empresa/:empresa_id', async (req, res, next) => {
       next(err);
     }
   });
+
+
+/**
+ * @swagger
+ * /api/v1/funcionarios/import/{empresa_id}:
+ *   post:
+ *     tags: [Funcionários]
+ *     summary: Importa lista de funcionários de um arquivo Excel
+ *     security:
+ *       - ApiKeyAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: empresa_id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID da empresa à qual todos os funcionários pertencem
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Importação concluída
+ *       400:
+ *         description: Falha na validação ou arquivo não enviado
+ */
+
+router.post(
+  '/import/:empresa_id',
+  authMiddleware,
+  upload.single('file'),
+  async (req, res, next) => {
+    try {
+      const empresaId = +req.params.empresa_id;
+      if (isNaN(empresaId)) throw new ApiError(400, 'empresa_id inválido.');
+      if (!req.file)   throw new ApiError(400, 'Arquivo não enviado.');
+
+      const summary = await importByEmpresa(empresaId, req.file.buffer);
+      return success(res, summary, 'Importação concluída.');
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 module.exports = router;
