@@ -11,6 +11,8 @@ const authMiddleware = require('./middlewares/auth');
 const errorHandler = require('./middlewares/errorHandler');
 const empresasRoutes = require('./routes/empresas');
 const funcionariosRoutes = require('./routes/funcionarios');
+const equipamentosRoutes = require('./routes/equipamentos');
+const medicaoRoutes = require('./routes/medicao');
 const { port } = require('./config');
 
 const app = express();
@@ -23,14 +25,17 @@ app.get('/', (req, res) => {
   res.send({ message: 'Bem-vindo à EngLabor API! Use /api-docs para documentação.' });
 });
 
-// Swagger UI
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.enable('strict routing'); 
+app.use('/api-docs',      swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/api-docs/',     swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Rotas públicas
 app.use('/api/v1/usuarios', usuariosRoutes);
 app.use('/api/v1/login', authRoutes);
 app.use('/api/v1/empresas', empresasRoutes);
 app.use('/api/v1/funcionarios', funcionariosRoutes);
+app.use('/api/v1/equipamentos', equipamentosRoutes);
+app.use('/api/v1/medicoes', medicaoRoutes);
 
 // Rotas protegidas
 app.use(authMiddleware);

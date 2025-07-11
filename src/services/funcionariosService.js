@@ -1,3 +1,5 @@
+// src/services/funcionariosService.js
+
 const pool = require('../db');
 const ApiError = require('../utils/ApiError');
 
@@ -58,53 +60,65 @@ async function deleteFuncionario(id) {
 
 /**
  * Retorna todos os funcionários de uma dada empresa
+// src/services/funcionariosService.js
+
+/**
+ * Retorna todos os funcionários de uma dada empresa,
+ * incluindo o status da medição (se existir)
  * @param {number} empresaId
  * @returns {Promise<Array>}
  */
 async function listFuncionariosByEmpresa(empresaId) {
-    const res = await pool.query(
-      `SELECT id, empresa_id, setor, ghe, cargo, matricula, nome
-         FROM funcionarios
-        WHERE empresa_id = $1
-        ORDER BY nome`,
-      [empresaId]
-    );
-    return res.rows;
-  }
+  const res = await pool.query(
+    `
+    SELECT 
+      f.id,
+      f.empresa_id,
+      f.setor,
+      f.ghe,
+      f.cargo,
+      f.matricula,
+      f.nome,
+      m.status AS medicao_status
+    FROM funcionarios f
+    LEFT JOIN medicao m
+      ON m.funcionario_id = f.id
+    WHERE f.empresa_id = $1
+    ORDER BY f.nome
+    `,
+    [empresaId]
+  );
+  return res.rows;
+}
 
 /**
  * Importa funcionários de um buffer Excel
  * @param {number} empresaId
  * @param {Buffer} buffer
- * @returns {{ inserted: number, updated: number, errors: Array<{row:number,message:string}> }}
  */
-// src/services/funcionariosService.js
 async function importByEmpresa(empresaId, buffer) {
   const xlsx = require('xlsx');
-  const wb    = xlsx.read(buffer, { type: 'buffer' });
+  const wb = xlsx.read(buffer, { type: 'buffer' });
   const sheet = wb.Sheets[wb.SheetNames[0]];
-  // Lê cada linha com defval:'' para não ter undefined
   const rawRows = xlsx.utils.sheet_to_json(sheet, { defval: '' });
 
-  // Mapeia as chaves do Excel (tanto Maiúsculas quanto sem acento)
-  const rows = rawRows.map((r, i) => ({
-    id:        r.id        ?? r['ID']             ?? '',
-    nome:      (r.nome     ?? r['Nome']            ?? '').toString().trim(),
-    matricula: (r.matricula ?? r['Matrícula']       ?? '').toString().trim(),
-    setor:     (r.setor    ?? r['Setor']            ?? '').toString().trim(),
-    ghe:       (r.ghe      ?? r['GHE']              ?? '').toString().trim(),
-    cargo:     (r.cargo    ?? r['Cargo']            ?? '').toString().trim(),
+  const rows = rawRows.map((r) => ({
+    id:        r.id ?? r.ID ?? null,
+    nome:      (r.nome ?? r.Nome ?? '').toString().trim(),
+    matricula: (r.matricula ?? r.Matrícula ?? '').toString().trim(),
+    setor:     (r.setor ?? r.Setor ?? '').toString().trim(),
+    ghe:       (r.ghe ?? r.GHE ?? '').toString().trim(),
+    cargo:     (r.cargo ?? r.Cargo ?? '').toString().trim(),
   }));
 
   const summary = { inserted: 0, updated: 0, errors: [] };
   const client = await pool.connect();
+
   try {
     await client.query('BEGIN');
     for (let [idx, row] of rows.entries()) {
       try {
-        if (!row.nome) {
-          throw new Error('Campo "nome" é obrigatório');
-        }
+        if (!row.nome) throw new Error('Campo "nome" é obrigatório');
         const data = {
           empresa_id: empresaId,
           nome:       row.nome,

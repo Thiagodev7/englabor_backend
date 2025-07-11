@@ -1,18 +1,25 @@
-const { error: sendError } = require('../utils/response');
+// src/middlewares/errorHandler.js
+
 const ApiError = require('../utils/ApiError');
 
 module.exports = (err, req, res, next) => {
-  // Se for nosso ApiError, usamos o status e message dele
+  // Se for nossa classe de erro
   if (err instanceof ApiError) {
-    return sendError(res, err.status, err.message, err.details);
+    return res
+      .status(err.status)
+      .json({
+        success: false,
+        message: err.message,
+        ...(err.details != null ? { errors: err.details } : {})
+      });
   }
 
-  // Caso contrário, é um erro inesperado
+  // Erro inesperado
   console.error(err);
-  return sendError(
-    res,
-    500,
-    'Erro interno no servidor.',
-    process.env.NODE_ENV === 'development' ? err.stack : null
-  );
+  return res
+    .status(500)
+    .json({
+      success: false,
+      message: 'Erro interno no servidor. Tente novamente mais tarde.'
+    });
 };
