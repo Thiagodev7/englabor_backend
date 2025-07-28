@@ -9,7 +9,7 @@ async function createEquipamento({
   data_vencimento
 }) {
   const text = `
-    INSERT INTO equipamentos
+    INSERT INTO public.equipamentos
       (tipo, marca, modelo, numero_serie,
        data_ultima_calibracao, numero_certificado, data_vencimento)
     VALUES ($1,$2,$3,$4,$5,$6,$7)
@@ -25,7 +25,7 @@ async function createEquipamento({
 async function listEquipamentos() {
   const res = await pool.query(
     `SELECT * 
-       FROM equipamentos
+       FROM public.equipamentos
       ORDER BY id`
   );
   return res.rows;
@@ -33,7 +33,7 @@ async function listEquipamentos() {
 
 async function getEquipamentoById(id) {
   const res = await pool.query(
-    `SELECT * FROM equipamentos WHERE id = $1`, [id]
+    `SELECT * FROM public.equipamentos WHERE id = $1`, [id]
   );
   if (res.rowCount === 0) throw new ApiError(404, 'Equipamento não encontrado.');
   return res.rows[0];
@@ -47,7 +47,7 @@ async function updateEquipamento(id, {
   data_vencimento
 }) {
   const text = `
-    UPDATE equipamentos SET
+    UPDATE public.equipamentos SET
       tipo                    = $1,
       marca                   = $2,
       modelo                  = $3,
@@ -70,7 +70,7 @@ async function updateEquipamento(id, {
 
 async function deleteEquipamento(id) {
   const res = await pool.query(
-    `DELETE FROM equipamentos WHERE id = $1`, [id]
+    `DELETE FROM public.equipamentos WHERE id = $1`, [id]
   );
   if (res.rowCount === 0) throw new ApiError(404, 'Equipamento não encontrado.');
   return true;

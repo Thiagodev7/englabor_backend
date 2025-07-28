@@ -4,7 +4,7 @@ const rateLimit = require('express-rate-limit');
 const ApiError = require('../utils/ApiError');
 const { success } = require('../utils/response');
 const { authenticate } = require('../services/authService');
-const { apiToken } = require('../config');
+const { apiToken } = require('../../config');
 
 const router = express.Router();
 const limiter = rateLimit({ windowMs: 15*60*1000, max: 10 });

@@ -5,7 +5,7 @@ const ApiError = require('../utils/ApiError');
 
 async function createFuncionario({ empresa_id, setor, ghe, cargo, matricula, nome }) {
   const text = `
-    INSERT INTO funcionarios
+    INSERT INTO public.funcionarios
       (empresa_id, setor, ghe, cargo, matricula, nome)
     VALUES ($1,$2,$3,$4,$5,$6)
     RETURNING id, empresa_id, setor, ghe, cargo, matricula, nome
@@ -18,7 +18,7 @@ async function createFuncionario({ empresa_id, setor, ghe, cargo, matricula, nom
 async function listFuncionarios() {
   const res = await pool.query(
     `SELECT id, empresa_id, setor, ghe, cargo, matricula, nome
-       FROM funcionarios
+       FROM public.funcionarios
        ORDER BY nome`
   );
   return res.rows;
@@ -27,7 +27,7 @@ async function listFuncionarios() {
 async function getFuncionarioById(id) {
   const res = await pool.query(
     `SELECT id, empresa_id, setor, ghe, cargo, matricula, nome
-       FROM funcionarios WHERE id = $1`,
+       FROM public.funcionarios WHERE id = $1`,
     [id]
   );
   if (res.rowCount === 0) throw new ApiError(404, 'Funcionário não encontrado.');
@@ -36,7 +36,7 @@ async function getFuncionarioById(id) {
 
 async function updateFuncionario(id, { empresa_id, setor, ghe, cargo, matricula, nome }) {
   const text = `
-    UPDATE funcionarios SET
+    UPDATE public.funcionarios SET
       empresa_id = $1,
       setor       = $2,
       ghe         = $3,
@@ -53,7 +53,7 @@ async function updateFuncionario(id, { empresa_id, setor, ghe, cargo, matricula,
 }
 
 async function deleteFuncionario(id) {
-  const res = await pool.query(`DELETE FROM funcionarios WHERE id = $1`, [id]);
+  const res = await pool.query(`DELETE FROM public.funcionarios WHERE id = $1`, [id]);
   if (res.rowCount === 0) throw new ApiError(404, 'Funcionário não encontrado.');
   return true;
 }
@@ -80,7 +80,7 @@ async function listFuncionariosByEmpresa(empresaId) {
       f.matricula,
       f.nome,
       m.status AS medicao_status
-    FROM funcionarios f
+    FROM public.funcionarios f
     LEFT JOIN medicao m
       ON m.funcionario_id = f.id
     WHERE f.empresa_id = $1

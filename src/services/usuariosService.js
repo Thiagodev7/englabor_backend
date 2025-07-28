@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 
 async function createUser({ nome, cpf, email, telefone, password, role }) {
   const hash = await bcrypt.hash(password, 10);
-  const text = `INSERT INTO usuarios (nome, cpf, email, telefone, password, role)
+  const text = `INSERT INTO public.usuarios (nome, cpf, email, telefone, password, role)
                 VALUES ($1,$2,$3,$4,$5,$6)
                 RETURNING id, nome, cpf, email, telefone, role, created_at`;
   const values = [nome, cpf, email, telefone || null, hash, role || 'user'];
@@ -13,7 +13,7 @@ async function createUser({ nome, cpf, email, telefone, password, role }) {
 
 async function findByIdentifier(identifier) {
   const text = `SELECT id, nome, cpf, email, telefone, password, role
-                FROM usuarios
+                FROM public.usuarios
                 WHERE cpf=$1 OR email=$1 OR telefone=$1`;
   const res = await pool.query(text, [identifier]);
   return res.rows[0];
@@ -22,7 +22,7 @@ async function findByIdentifier(identifier) {
 async function findById(id) {
   const res = await pool.query(
     `SELECT id, nome, cpf, email, telefone, password, role
-     FROM usuarios WHERE id = $1`,
+     FROM public.usuarios WHERE id = $1`,
     [id]
   );
   return res.rows[0];
@@ -30,7 +30,7 @@ async function findById(id) {
 
 async function updateUser(id, { nome, cpf, email, telefone, role }) {
   const text = `
-    UPDATE usuarios
+    UPDATE public.usuarios
     SET nome = $1,
         cpf = $2,
         email = $3,
@@ -52,7 +52,7 @@ async function changePassword(id, oldPassword, newPassword) {
   if (!valid) return null;
   const hash = await bcrypt.hash(newPassword, 10);
   await pool.query(
-    `UPDATE usuarios
+    `UPDATE public.usuarios
      SET password = $1,
          updated_at = CURRENT_TIMESTAMP
      WHERE id = $2`,

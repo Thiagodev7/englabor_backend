@@ -13,7 +13,7 @@ const empresasRoutes = require('./routes/empresas');
 const funcionariosRoutes = require('./routes/funcionarios');
 const equipamentosRoutes = require('./routes/equipamentos');
 const medicaoRoutes = require('./routes/medicao');
-const { port } = require('./config');
+const { port } = require('../config');
 
 const app = express();
 app.use(helmet());

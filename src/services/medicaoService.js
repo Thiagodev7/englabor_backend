@@ -24,7 +24,7 @@ async function createMedicao({
   observacao
 }) {
   const text = `
-    INSERT INTO medicao (
+    INSERT INTO public.medicao (
       funcionario_id, equipamento_id, avaliador_id, status,
       data_medicao, hora_inicio, hora_fim, tempo_mostragem,
       nen_q5, lavg_q5, nen_q3, lavg_q3,
@@ -43,12 +43,27 @@ async function createMedicao({
     )
     RETURNING *`;
   const values = [
-    funcionario_id, equipamento_id, avaliador_id, status,
-    data_medicao, hora_inicio, hora_fim, tempo_mostragem,
-    nen_q5, lavg_q5, nen_q3, lavg_q3,
-    calibracao_inicial, calibracao_final, desvio,
-    tempo_pausa, inicio_pausa, final_pausa,
-    jornada_trabalho, observacao
+    funcionario_id,
+    equipamento_id,
+    avaliador_id,
+    status,
+    data_medicao,
+    hora_inicio,
+    hora_fim,
+    // se for string vazia, envia null
+    tempo_mostragem || null,
+    nen_q5,
+    lavg_q5,
+    nen_q3,
+    lavg_q3,
+    calibracao_inicial,
+    calibracao_final,
+    desvio,
+    tempo_pausa || null,
+    inicio_pausa,
+    final_pausa,
+    jornada_trabalho,
+    observacao
   ];
   const res = await pool.query(text, values);
   return res.rows[0];
@@ -64,7 +79,7 @@ async function listMedicoes() {
       tempo_pausa, inicio_pausa, final_pausa,
       jornada_trabalho, observacao,
       created_at, updated_at
-    FROM medicao
+    FROM public.medicao
     ORDER BY data_medicao DESC
   `);
   return res.rows;
@@ -80,7 +95,7 @@ async function getMedicaoById(id) {
       tempo_pausa, inicio_pausa, final_pausa,
       jornada_trabalho, observacao,
       created_at, updated_at
-    FROM medicao
+    FROM public.medicao
     WHERE id = $1
   `, [id]);
   if (res.rowCount === 0) throw new ApiError(404, 'Medição não encontrada.');
@@ -110,7 +125,7 @@ async function updateMedicao(id, {
   observacao
 }) {
   const text = `
-    UPDATE medicao SET
+    UPDATE public.medicao SET
       funcionario_id     = $1,
       equipamento_id     = $2,
       avaliador_id       = $3,
@@ -135,12 +150,26 @@ async function updateMedicao(id, {
     WHERE id = $21
     RETURNING *`;
   const values = [
-    funcionario_id, equipamento_id, avaliador_id, status,
-    data_medicao, hora_inicio, hora_fim, tempo_mostragem,
-    nen_q5, lavg_q5, nen_q3, lavg_q3,
-    calibracao_inicial, calibracao_final, desvio,
-    tempo_pausa, inicio_pausa, final_pausa,
-    jornada_trabalho, observacao,
+    funcionario_id,
+    equipamento_id,
+    avaliador_id,
+    status,
+    data_medicao,
+    hora_inicio,
+    hora_fim,
+    tempo_mostragem || null,
+    nen_q5,
+    lavg_q5,
+    nen_q3,
+    lavg_q3,
+    calibracao_inicial,
+    calibracao_final,
+    desvio,
+    tempo_pausa || null,
+    inicio_pausa,
+    final_pausa,
+    jornada_trabalho,
+    observacao,
     id
   ];
   const res = await pool.query(text, values);
@@ -149,7 +178,7 @@ async function updateMedicao(id, {
 }
 
 async function deleteMedicao(id) {
-  const res = await pool.query(`DELETE FROM medicao WHERE id = $1`, [id]);
+  const res = await pool.query(`DELETE FROM public.medicao WHERE id = $1`, [id]);
   if (res.rowCount === 0) throw new ApiError(404, 'Medição não encontrada.');
   return true;
 }
@@ -157,7 +186,7 @@ async function deleteMedicao(id) {
 async function getMedicaoByFuncionario(funcionarioId) {
   const res = await pool.query(
     `SELECT * 
-       FROM medicao 
+       FROM public.medicao 
       WHERE funcionario_id = $1 
       LIMIT 1`,
     [funcionarioId]

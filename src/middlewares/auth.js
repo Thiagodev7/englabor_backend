@@ -1,4 +1,4 @@
-const { apiToken } = require('../config');
+const { apiToken } = require('../../config');
 module.exports = (req, res, next) => {
   const token = req.header('x-api-key') || req.header('Authorization')?.replace(/^Bearer\s+/, '');
   if (!token || token !== apiToken) {

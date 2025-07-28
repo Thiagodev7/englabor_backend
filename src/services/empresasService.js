@@ -3,7 +3,7 @@ const ApiError = require('../utils/ApiError');
 
 async function createEmpresa({ nome, cnpj }) {
   const text = `
-    INSERT INTO empresas (nome, cnpj)
+    INSERT INTO public.empresas (nome, cnpj)
     VALUES ($1, $2)
     RETURNING id, nome, cnpj
   `;
@@ -14,7 +14,7 @@ async function createEmpresa({ nome, cnpj }) {
 
 async function updateEmpresa(id, { nome, cnpj }) {
   const text = `
-    UPDATE empresas
+    UPDATE public.empresas
     SET nome = $1,
         cnpj = $2
     WHERE id = $3
@@ -33,7 +33,7 @@ async function deleteEmpresa(id) {
       [id]
     );
     const res = await pool.query(
-      `DELETE FROM empresas WHERE id = $1`,
+      `DELETE FROM public.empresas WHERE id = $1`,
       [id]
     );
     if (res.rowCount === 0) {
@@ -49,7 +49,7 @@ async function deleteEmpresa(id) {
 async function listEmpresas() {
     const res = await pool.query(
       `SELECT id, nome, cnpj
-         FROM empresas
+         FROM public.empresas
          ORDER BY nome`
     );
     return res.rows;
