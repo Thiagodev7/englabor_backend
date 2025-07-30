@@ -19,7 +19,14 @@ const app = express();
 app.use(helmet());
 app.use(cors());
 app.use(morgan('combined'));
-app.use(express.json());
+app.use(express.json({ 
+  limit: '5mb'   // ou o tamanho que você quiser
+}));
+
+app.use(express.urlencoded({ 
+  limit: '5mb', 
+  extended: true 
+}));
 
 app.get('/', (req, res) => {
   res.send({ message: 'Bem-vindo à EngLabor API! Use /api-docs para documentação.' });

@@ -19,26 +19,28 @@ router.use(authMw);
 
 // Joi validation schema for Medicao
 const schema = Joi.object({
-  funcionario_id:     Joi.number().integer().required(),
-  equipamento_id:     Joi.number().integer().required(),
-  avaliador_id:       Joi.number().integer().required(),
-  status:             Joi.string().max(50).required(),
-  data_medicao:       Joi.date().optional().allow(null),
-  hora_inicio:        Joi.string().pattern(/^\d{2}:\d{2}(:\d{2})?$/).optional().allow('', null),
-  hora_fim:           Joi.string().pattern(/^\d{2}:\d{2}(:\d{2})?$/).optional().allow('', null),
-  tempo_mostragem:    Joi.string().optional().allow('', null),
-  nen_q5:             Joi.number().optional().allow(null),
-  lavg_q5:            Joi.number().optional().allow(null),
-  nen_q3:             Joi.number().optional().allow(null),
-  lavg_q3:            Joi.number().optional().allow(null),
-  calibracao_inicial: Joi.number().optional().allow(null),
-  calibracao_final:   Joi.number().optional().allow(null),
-  desvio:             Joi.number().optional().allow(null),
-  tempo_pausa:        Joi.string().optional().allow('', null),
-  inicio_pausa:       Joi.string().pattern(/^\d{2}:\d{2}(:\d{2})?$/).optional().allow('', null),
-  final_pausa:        Joi.string().pattern(/^\d{2}:\d{2}(:\d{2})?$/).optional().allow('', null),
-  jornada_trabalho:   Joi.string().optional().allow('', null),
-  observacao:         Joi.string().optional().allow('', null),
+  funcionario_id:        Joi.number().integer().required(),
+  equipamento_id:        Joi.number().integer().required(),
+  avaliador_id:          Joi.number().integer().required(),
+  status:                Joi.string().max(50).required(),
+  data_medicao:          Joi.date().optional().allow(null),
+  hora_inicio:           Joi.string().pattern(/^\d{2}:\d{2}(:\d{2})?$/).optional().allow('', null),
+  hora_fim:              Joi.string().pattern(/^\d{2}:\d{2}(:\d{2})?$/).optional().allow('', null),
+  tempo_mostragem:       Joi.string().optional().allow('', null),
+  nen_q5:                Joi.number().optional().allow(null),
+  lavg_q5:               Joi.number().optional().allow(null),
+  nen_q3:                Joi.number().optional().allow(null),
+  lavg_q3:               Joi.number().optional().allow(null),
+  calibracao_inicial:    Joi.number().optional().allow(null),
+  calibracao_final:      Joi.number().optional().allow(null),
+  hora_calibracao_inicio:Joi.string().pattern(/^\d{2}:\d{2}(:\d{2})?$/).optional().allow('', null),  // ← novo
+  hora_calibracao_fim:   Joi.string().pattern(/^\d{2}:\d{2}(:\d{2})?$/).optional().allow('', null),  // ← novo
+  desvio:                Joi.number().optional().allow(null),
+  tempo_pausa:           Joi.string().optional().allow('', null),
+  inicio_pausa:          Joi.string().pattern(/^\d{2}:\d{2}(:\d{2})?$/).optional().allow('', null),
+  final_pausa:           Joi.string().pattern(/^\d{2}:\d{2}(:\d{2})?$/).optional().allow('', null),
+  jornada_trabalho:      Joi.string().optional().allow('', null),
+  observacao:            Joi.string().optional().allow('', null),
 });
 
 // GET /medicoes - lista todas medições
