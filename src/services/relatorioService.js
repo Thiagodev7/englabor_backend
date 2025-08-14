@@ -1,5 +1,4 @@
 // src/services/relatorioService.js
-
 const pool = require('../db');
 const ApiError = require('../utils/ApiError');
 
@@ -13,6 +12,9 @@ async function getRelatorioByMatricula(matricula) {
       f.setor        AS funcionario_setor,
       f.ghe          AS funcionario_ghe,
       f.cargo        AS funcionario_cargo,
+      -- Se você tiver coluna de foto, DESCOMENTE uma das linhas abaixo:
+      -- f.foto_url     AS funcionario_foto_url,
+      -- encode(f.foto, 'base64') AS funcionario_foto_base64,
       e.id           AS empresa_id,
       e.nome         AS empresa_nome,
       e.cnpj         AS empresa_cnpj
@@ -59,7 +61,7 @@ async function getRelatorioByMatricula(matricula) {
   const avRes = await pool.query(avText, [med.avaliador_id]);
   const av = avRes.rowCount ? avRes.rows[0] : null;
 
-  // Monta retorno
+  // Monta retorno padronizado
   return {
     empresa:   { id: func.empresa_id, nome: func.empresa_nome, cnpj: func.empresa_cnpj },
     funcionario: {
@@ -68,12 +70,12 @@ async function getRelatorioByMatricula(matricula) {
       matricula: func.funcionario_matricula,
       setor: func.funcionario_setor,
       ghe: func.funcionario_ghe,
-      cargo: func.funcionario_cargo
+      cargo: func.funcionario_cargo,
     },
     medicao: {
       id: med.id,
       status: med.status,
-      data_medicao: med.data_medicao,
+      data_medicao: med.data_medicao, // Date (pg) ou string
       hora_inicio: med.hora_inicio,
       hora_fim: med.hora_fim,
       tempo_mostragem: med.tempo_mostragem,
@@ -83,8 +85,10 @@ async function getRelatorioByMatricula(matricula) {
       lavg_q5: med.lavg_q5,
       nen_q3: med.nen_q3,
       lavg_q3: med.lavg_q3,
-      calibracao_inicial: med.calibracao_inicial,
-      calibracao_final: med.calibracao_final
+      calibracao_inicial: med.calibracao_inicial, // nomes padronizados
+      calibracao_final: med.calibracao_final,
+      foto_base64: med.foto_base64,
+
     },
     equipamento: eq,
     avaliador: av

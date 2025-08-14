@@ -19,6 +19,7 @@
     "morgan": "^1.10.0",
     "multer": "^2.0.1",
     "pg": "^8.14.1",
+    "puppeteer": "^24.16.2",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "xlsx": "^0.18.5"
